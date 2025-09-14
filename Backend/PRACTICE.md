@@ -17,6 +17,6 @@
 
 5) Most important --> Before working always excute command in main directory 
 
-    git pull origin developer
+     > - git pull origin developer 
 
 6) Commit message should be meaningfull, use of AI to write message.
