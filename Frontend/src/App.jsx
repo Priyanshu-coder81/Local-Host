@@ -4,6 +4,8 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import ChatBox from './components/ChatBox'
+import Doctor from './components/Doctor'
+import PatientDashboard from './components/PatientDashboard'
 
 function App() {
   const navigate = useNavigate()
@@ -19,9 +21,16 @@ function App() {
   const [isStoreDetailsOpen, setIsStoreDetailsOpen] = useState(false)
   const [medicineSearch, setMedicineSearch] = useState('')
   const [searchResults, setSearchResults] = useState([])
+  const [isDoctorOpen, setIsDoctorOpen] = useState(false)
+  const [specializations, setSpecializations] = useState([])
+  const [selectedSpecialization, setSelectedSpecialization] = useState(null)
+  const [doctors, setDoctors] = useState([])
   const [loginData, setLoginData] = useState({ email: '', password: '', role: 'patient' })
-  const [signupData, setSignupData] = useState({ email: '', password: '', role: 'patient' })
+  const [signupData, setSignupData] = useState({ email: '', password: '', role: 'patient', registrationNumber: '', specialization: '' })
   const [storeData, setStoreData] = useState({ name: '', address: '', contact: '', gstNo: '' })
+  const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const [selectedDoctorForBooking, setSelectedDoctorForBooking] = useState(null)
+  const [bookingData, setBookingData] = useState({ date: '', time: '' })
 
 
   useEffect(() => {
@@ -30,6 +39,8 @@ function App() {
       setUser(JSON.parse(storedUser))
     }
   }, [])
+
+
 
   useEffect(() => {
     if (isStoreOpen) {
@@ -57,6 +68,30 @@ function App() {
         })
     }
   }, [isStoreOpen])
+
+  useEffect(() => {
+    if (isDoctorOpen) {
+      fetch('http://localhost:8000/api/doctors/specializations')
+        .then((res) => {
+          if (res.ok) {
+            return res.json()
+          } else {
+            throw new Error(`Failed to fetch specializations: ${res.status}`)
+          }
+        })
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setSpecializations(data)
+          } else {
+            setSpecializations([])
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch specializations:', err)
+          setSpecializations([])
+        })
+    }
+  }, [isDoctorOpen])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -99,7 +134,7 @@ function App() {
         localStorage.setItem('user', JSON.stringify(data.user))
         setUser(data.user)
         setIsSignupOpen(false)
-        setSignupData({ email: '', password: '', role: 'patient' })
+        setSignupData({ email: '', password: '', role: 'patient', registrationNumber: '', specialization: '' })
       } else {
         alert(`Signup failed: ${data.message}`)
       }
@@ -154,6 +189,22 @@ function App() {
     setIsStoreDetailsOpen(true)
   }
 
+  const handleSpecializationClick = async (specialization) => {
+    setSelectedSpecialization(specialization)
+    try {
+      const res = await fetch(`http://localhost:8000/api/doctors/specialization/${encodeURIComponent(specialization)}`)
+      if (res.ok) {
+        const data = await res.json()
+        setDoctors(data)
+      } else {
+        setDoctors([])
+      }
+    } catch (err) {
+      console.error('Failed to fetch doctors:', err)
+      setDoctors([])
+    }
+  }
+
   const [manualSearch, setManualSearch] = useState('')
 
   const handleSearchChange = (e) => {
@@ -187,36 +238,77 @@ function App() {
     }
   }
 
+  const handleBookAppointment = async (e) => {
+    e.preventDefault()
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetch('http://localhost:8000/api/appointments/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          doctorId: selectedDoctorForBooking._id,
+          date: bookingData.date,
+          time: bookingData.time
+        })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        alert('Appointment booked successfully!')
+        setIsBookingOpen(false)
+        setBookingData({ date: '', time: '' })
+        setSelectedDoctorForBooking(null)
+      } else {
+        alert('Failed to book appointment')
+      }
+    } catch (err) {
+      console.error('Booking failed:', err)
+      alert('Booking failed')
+    }
+  }
+
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        {user && user.role === 'doctor' ? (
+          <Doctor user={user} />
+        ) : user && user.role === 'patient' ? (
+          <PatientDashboard />
+        ) : (
+          <>
+            <a href="https://vite.dev" target="_blank">
+              <img src={viteLogo} className="logo" alt="Vite logo" />
+            </a>
+            <a href="https://react.dev" target="_blank">
+              <img src={reactLogo} className="logo react" alt="React logo" />
+            </a>
+            <h1>Vite + React</h1>
+            <div className="card">
+              <button onClick={() => setCount((count) => count + 1)}>
+                count is {count}
+              </button>
+              <p>
+                Edit <code>src/App.jsx</code> and save to test HMR
+              </p>
+            </div>
+            <p className="read-the-docs">
+              Click on the Vite and React logos to learn more
+            </p>
+          </>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
 
       {/* Floating Chat Button */}
-      <button
-        onClick={() => setIsChatOpen(true)}
-        className="fixed bottom-4 right-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300 z-50"
-      >
-        💬
-      </button>
+      {user && user.role !== 'doctor' && (
+        <button
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-4 right-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300 z-50"
+        >
+          💬
+        </button>
+      )}
 
       {/* Chat Modal */}
       {isChatOpen && (
@@ -257,7 +349,7 @@ function App() {
       )}
 
       {/* Logout Button */}
-      {user && (
+      {user && user.role !== 'doctor' && (
         <div className="fixed top-4 right-4 z-50">
           <button
             onClick={handleLogout}
@@ -350,7 +442,7 @@ function App() {
               />
               <select
                 value={signupData.role}
-                onChange={(e) => setSignupData({ ...signupData, role: e.target.value })}
+                onChange={(e) => setSignupData({ ...signupData, role: e.target.value, registrationNumber: '', specialization: '', name: '', age: '', gender: '' })}
                 className="w-full mb-3 p-2 border rounded"
                 required
               >
@@ -358,6 +450,75 @@ function App() {
                 <option value="doctor">Doctor</option>
                 <option value="medicine_store">Medicine Store</option>
               </select>
+              {signupData.role === 'doctor' && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Registration Number"
+                    value={signupData.registrationNumber}
+                    onChange={(e) => setSignupData({ ...signupData, registrationNumber: e.target.value })}
+                    className="w-full mb-3 p-2 border rounded"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Specialization"
+                    value={signupData.specialization}
+                    onChange={(e) => setSignupData({ ...signupData, specialization: e.target.value })}
+                    className="w-full mb-3 p-2 border rounded"
+                    required
+                  />
+                </>
+              )}
+
+              {signupData.role === 'patient' && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={signupData.name}
+                    onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+                    className="w-full mb-3 p-2 border rounded"
+                    required
+                  />
+                  <input
+                    type="number"
+                    placeholder="Age"
+                    value={signupData.age}
+                    onChange={(e) => setSignupData({ ...signupData, age: e.target.value })}
+                    className="w-full mb-3 p-2 border rounded"
+                    required
+                    min={0}
+                  />
+                  <select
+                    value={signupData.gender}
+                    onChange={(e) => setSignupData({ ...signupData, gender: e.target.value })}
+                    className="w-full mb-3 p-2 border rounded"
+                    required
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Phone"
+                    value={signupData.phone || ''}
+                    onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
+                    className="w-full mb-3 p-2 border rounded"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Address"
+                    value={signupData.address || ''}
+                    onChange={(e) => setSignupData({ ...signupData, address: e.target.value })}
+                    className="w-full mb-3 p-2 border rounded"
+                    required
+                  />
+                </>
+              )}
               <button
                 type="submit"
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
@@ -384,7 +545,44 @@ function App() {
         </div>
       )}
 
-{/* Medicine Store Button */}
+      {/* Booking Modal */}
+      {isBookingOpen && selectedDoctorForBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <h2 className="text-xl font-bold mb-4">Book Appointment with {selectedDoctorForBooking.email}</h2>
+            <form onSubmit={handleBookAppointment}>
+              <input
+                type="date"
+                value={bookingData.date}
+                onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
+                className="w-full mb-3 p-2 border rounded"
+                required
+              />
+              <input
+                type="time"
+                value={bookingData.time}
+                onChange={(e) => setBookingData({ ...bookingData, time: e.target.value })}
+                className="w-full mb-3 p-2 border rounded"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
+              >
+                Book Appointment
+              </button>
+            </form>
+            <button
+              onClick={() => setIsBookingOpen(false)}
+              className="mt-2 text-gray-600 underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Medicine Store Button */}
 {user && user.role === 'medicine_store' && (
   <button
     onClick={() => navigate('/medicine-dashboard')}
@@ -394,14 +592,97 @@ function App() {
   </button>
 )}
 
-{(!user || user.role !== 'medicine_store') && (
-  <button
-    onClick={() => setIsStoreOpen(true)}
-    className="fixed bottom-20 right-4 bg-green-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300 z-50"
-  >
-    🏥 Medicine Stores
-  </button>
+
+
+{(!user || (user.role !== 'medicine_store' && user.role !== 'doctor')) && (
+  <>
+    <button
+      onClick={() => setIsStoreOpen(true)}
+      className="fixed bottom-20 right-4 bg-green-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300 z-50"
+    >
+      🏥 Medicine Stores
+    </button>
+
+    {/* Doctor Button */}
+    <button
+      onClick={() => {
+        setIsDoctorOpen(true)
+        setSelectedSpecialization(null)
+        setDoctors([])
+      }}
+      className="fixed bottom-28 right-4 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300 z-50"
+    >
+      🩺 Doctors
+    </button>
+  </>
 )}
+
+      {/* Doctor Modal */}
+      {isDoctorOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-auto">
+            <div className="flex justify-between items-center p-4 bg-blue-600 text-white rounded-t-2xl">
+              <h2 className="text-xl font-bold">Specialist Doctors</h2>
+              <button
+                onClick={() => setIsDoctorOpen(false)}
+                className="text-white hover:text-gray-200 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4">
+              {!selectedSpecialization ? (
+                <ul>
+                  {specializations.map((spec) => (
+                    <li
+                      key={spec}
+                      className="mb-4 border-b pb-2 cursor-pointer hover:bg-gray-100 p-2 rounded"
+                      onClick={() => handleSpecializationClick(spec)}
+                    >
+                      {spec}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setSelectedSpecialization(null)
+                      setDoctors([])
+                    }}
+                    className="mb-4 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                  >
+                    Back to Specializations
+                  </button>
+                  {doctors.length === 0 ? (
+                    <p>No doctors registered under this specialization.</p>
+                  ) : (
+                    <ul>
+                      {doctors.map((doctor) => (
+                        <li key={doctor._id} className="mb-4 border-b pb-2 p-2 rounded">
+                          <p><strong>Email:</strong> {doctor.email}</p>
+                          <p><strong>Registration Number:</strong> {doctor.registrationNumber}</p>
+                          <p><strong>Specialization:</strong> {doctor.specialization}</p>
+                          <button
+                            onClick={() => {
+                              setSelectedDoctorForBooking(doctor)
+                              setIsBookingOpen(true)
+                              setIsDoctorOpen(false)
+                            }}
+                            className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                          >
+                            Book Appointment
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Medicine Store Modal */}
       {isStoreOpen && (

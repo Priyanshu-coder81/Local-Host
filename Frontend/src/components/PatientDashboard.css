@@ -1,0 +1,271 @@
+.patient-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.dashboard-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+}
+
+.dashboard-nav button {
+  padding: 12px 24px;
+  border: none;
+  background: #f5f5f5;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.dashboard-nav button:hover {
+  background: #e0e0e0;
+}
+
+.dashboard-nav button.active {
+  background: #007bff;
+  color: white;
+}
+
+.patient-dashboard h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.appointments-list {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.appointment-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.appointment-card h3 {
+  color: #007bff;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.appointment-card p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.appointment-card button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s ease;
+}
+
+.appointment-card button:hover {
+  background: #218838;
+}
+
+.appointment-card p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.status-pending {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.status-confirmed {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-completed {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.status-cancelled {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.appointment-medical-records {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.appointment-medical-records h4 {
+  margin: 0 0 10px 0;
+  color: #495057;
+  font-size: 16px;
+}
+
+.no-records {
+  color: #6c757d;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+.medical-records-section {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.medical-records-list {
+  list-style: none;
+  padding: 0;
+}
+
+.medical-record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: #f9f9f9;
+}
+
+.medical-record-item a:first-child {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.medical-record-item a:first-child:hover {
+  text-decoration: underline;
+}
+
+.download-link {
+  background: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.download-link:hover {
+  background: #0056b3;
+}
+
+.medical-records-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.medical-records-modal > div {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.medical-records-modal h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.medical-records-modal button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.medical-records-modal button:hover {
+  background: #c82333;
+}
+
+.medical-records-modal ul {
+  list-style: none;
+  padding: 0;
+}
+
+.medical-records-modal li {
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.medical-records-modal li:last-child {
+  border-bottom: none;
+}
+
+.medical-records-modal a {
+  color: #007bff;
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+.medical-records-modal a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .patient-dashboard {
+    padding: 10px;
+  }
+
+  .dashboard-nav {
+    flex-direction: column;
+  }
+
+  .appointments-list {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-card {
+    padding: 15px;
+  }
+
+  .medical-record-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
